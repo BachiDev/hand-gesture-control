@@ -121,9 +121,6 @@ export default function Home() {
               <ContentBlock title="Timer Logic" desc="Holding the middle finger now triggers a 3-second countdown before stopping." />
               <ContentBlock title="Robustness" desc="Stricter math ensures fingers are definitely curled or extended." />
               <ContentBlock title="User Feedback" desc="Visual overlays help the user know when an action is about to happen." />
-              {[...Array(9)].map((_, i) => (
-                  <ContentBlock key={i} title={`Block ${i+1}`} desc="Keep scrolling down to test the thumbs-down gesture." />
-              ))}
            </div>
            <div className="p-12 text-center text-neutral-600">-- End of Content --</div>
         </div>
