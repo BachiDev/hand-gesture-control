@@ -85,11 +85,7 @@ export default function Home() {
       <header className="fixed top-0 w-full z-40 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 p-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-purple-400 font-bold text-xl">GestureFlow</span>
-          </div>
-          <div className="hidden sm:flex gap-4 text-sm text-neutral-400">
-             <span>👍 Scroll Up</span>
-             <span>👎 Scroll Down</span>
+            <span className="text-purple-400 font-bold text-xl">Hand Gesture Control</span>
           </div>
         </div>
       </header>
