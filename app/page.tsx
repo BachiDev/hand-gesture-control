@@ -6,12 +6,7 @@ import InstructionPanel from './components/InstructionPanel';
 import FeedbackToast from './components/FeedbackToast';
 import { GestureType } from './utils/gestureLogic';
 
-const ContentBlock = ({ title, desc }: { title: string, desc: string }) => (
-  <div className="p-6 rounded-xl bg-neutral-800/70 border border-neutral-700 space-y-3">
-    <h3 className="text-xl font-semibold text-purple-400">{title}</h3>
-    <p className="text-sm text-neutral-400">{desc}</p>
-  </div>
-);
+import ContentBlock from './components/ContentBlock';
 
 export default function Home() {
   const [currentGesture, setCurrentGesture] = useState<GestureType>('none');
@@ -118,7 +113,10 @@ export default function Home() {
         <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showContent ? 'opacity-100 max-h-[5000px]' : 'opacity-0 max-h-0'}`}>
            <h2 className="text-3xl font-bold text-neutral-200 mb-6">Scrollable Content Area</h2>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <ContentBlock title="Timer Logic" desc="Holding the middle finger now triggers a 3-second countdown before stopping." />
+              <ContentBlock title="TensorFlow.js" desc="The project leverages TensorFlow.js, an open-source library for machine learning in JavaScript, to run the hand pose detection model directly in the browser." />
+              <ContentBlock title="Hand Pose Detection" desc="Utilizes a pre-trained machine learning model (MediaPipe Hands) specialized in detecting 21 key points of a hand from a video feed in real-time." />
+              <ContentBlock title="Real-time Gesture Recognition" desc="The application analyzes the geometry of the detected hand landmarks to recognize specific gestures like 'Thumbs Up' or 'Victory' with high accuracy." />
+              <ContentBlock title="Timer Logic" desc="Holding the middle finger triggers a 3-second countdown before stopping." />
               <ContentBlock title="Robustness" desc="Stricter math ensures fingers are definitely curled or extended." />
               <ContentBlock title="User Feedback" desc="Visual overlays help the user know when an action is about to happen." />
            </div>
