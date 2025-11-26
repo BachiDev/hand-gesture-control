@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
+import Image from "next/image";
 import WebcamFrame from './components/WebcamFrame';
 import InstructionPanel from './components/InstructionPanel';
 import FeedbackToast from './components/FeedbackToast';
 import ContentBlock from './components/ContentBlock';
 import { GestureType } from './utils/gestureLogic';
+import FloatingActionButton from './components/FloatingActionButton';
 
 export default function Home() {
   const [currentGesture, setCurrentGesture] = useState<GestureType>('none');
@@ -81,11 +83,17 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-purple-500/30">
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans">
       <header className="fixed top-0 w-full z-40 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 p-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-purple-400 font-bold text-xl">Hand Gesture Control</span>
+            <Image
+              alt="Logo"
+              height="30"
+              src="/logo.png"
+              width="30"
+            />
+            <span className="font-bold text-xl">Hand Gesture Control</span>
           </div>
         </div>
       </header>
@@ -118,7 +126,7 @@ export default function Home() {
            <div className="p-12 text-center text-neutral-600">-- End of Content --</div>
         </div>
       </main>
-
+      <FloatingActionButton href="https://github.com/BachiDev/BachiDev.github.io" />
       <FeedbackToast gesture={currentGesture} />
     </div>
   );
