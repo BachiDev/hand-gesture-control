@@ -15,7 +15,11 @@ interface HandDetector {
 declare global {
   interface Window {
     handPoseDetection: {
-      createDetector: (model: any, config: any) => Promise<HandDetector>;
+      createDetector: (model: string, config: { 
+        runtime: string; 
+        solutionPath: string; 
+        modelType: string; 
+      }) => Promise<HandDetector>;
       SupportedModels: { MediaPipeHands: string };
     };
   }
@@ -110,6 +114,7 @@ export default function WebcamFrame({
           };
         }
       } catch (err) {
+        console.error(err);
         setError('Camera permission denied');
       }
     };
@@ -140,7 +145,7 @@ export default function WebcamFrame({
             onGestureDetected('none');
           }
         }
-      } catch (e) { /* ignore */ }
+      } catch { /* ignore */ }
       
       requestRef.current = requestAnimationFrame(detectLoop);
     };
