@@ -4,9 +4,8 @@ import React, { useState, useRef, useCallback } from 'react';
 import WebcamFrame from './components/WebcamFrame';
 import InstructionPanel from './components/InstructionPanel';
 import FeedbackToast from './components/FeedbackToast';
-import { GestureType } from './utils/gestureLogic';
-
 import ContentBlock from './components/ContentBlock';
+import { GestureType } from './utils/gestureLogic';
 
 export default function Home() {
   const [currentGesture, setCurrentGesture] = useState<GestureType>('none');
