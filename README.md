@@ -1,8 +1,8 @@
 # 👋 Hand Gesture Control
 
-![Hand Gesture Control UI](https://i.imgur.com/8a1fT3D.png)
-
 A web application that allows you to control a user interface using real-time hand gestures captured from your webcam. This project uses machine learning to recognize specific hand poses and translate them into actions like scrolling and toggling content.
+
+[Check Out Live](https://bachidev.github.io/hand-gesture-control)
 
 ## ✨ Features
 

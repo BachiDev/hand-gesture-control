@@ -126,7 +126,7 @@ export default function Home() {
            <div className="p-12 text-center text-neutral-600">-- End of Content --</div>
         </div>
       </main>
-      <FloatingActionButton href="https://github.com/BachiDev/BachiDev.github.io" />
+      <FloatingActionButton href="https://github.com/BachiDev/hand-gesture-control" />
       <FeedbackToast gesture={currentGesture} />
     </div>
   );
