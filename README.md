@@ -1,10 +1,10 @@
-# 👋 Hand Gesture Control
+# Hand Gesture Control
 
 A web application that allows you to control a user interface using real-time hand gestures captured from your webcam. This project uses machine learning to recognize specific hand poses and translate them into actions like scrolling and toggling content.
 
 [Check Out Live](https://bachidev.github.io/hand-gesture-control)
 
-## ✨ Features
+## Features
 
 *   **Real-time Hand Tracking**: Utilizes your webcam to track the position and orientation of your hand in real-time.
 *   **Gesture-based UI Control**:
@@ -15,7 +15,7 @@ A web application that allows you to control a user interface using real-time ha
 *   **Visual Feedback**: An overlay on the webcam feed draws the detected hand skeleton, providing immediate visual feedback. A toast notification also confirms the currently recognized gesture.
 *   **Client-side Machine Learning**: All hand tracking and gesture recognition runs directly in your browser, ensuring privacy and low latency.
 
-## 🚀 Technical Deep Dive
+## Technical Deep Dive
 
 This project is built on a modern web stack and leverages in-browser machine learning for its core functionality.
 
@@ -79,7 +79,7 @@ if (isIndexCurled && isMiddleCurled && isRingCurled && isPinkyCurled) {
 ```
 This same principle is applied to detect the other gestures, with additional checks like hand inversion for robustness (e.g., distinguishing a thumbs down from a thumbs up when the hand is upside down).
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 *   **Framework**: [Next.js](https://nextjs.org/) 16 / [React](https://react.dev/) 19
 *   **Language**: [TypeScript](https://www.typescriptlang.org/)
@@ -91,21 +91,7 @@ This same principle is applied to detect the other gestures, with additional che
 *   **UI Components**: [Lucide React](https://lucide.dev/) (for icons)
 *   **Utilities**: [clsx](https://github.com/lukeed/clsx) & [tailwind-merge](https://github.com/dcastil/tailwind-merge)
 
-## 📂 Project Structure
-
-```
-/
-├── app/
-│   ├── components/       # React components (Webcam, Instructions, etc.)
-│   ├── utils/
-│   │   └── gestureLogic.ts # Core gesture detection logic
-│   ├── layout.tsx        # Root layout, loads CDN scripts
-│   └── page.tsx          # Main page, handles gesture state and actions
-├── public/               # Static assets (images, icons)
-└── ...                   # Config files (next.config, tsconfig, etc.)
-```
-
-## 🚀 Getting Started
+## Getting Started
 
 1.  **Clone the repository:**
     ```bash
@@ -125,7 +111,7 @@ This same principle is applied to detect the other gestures, with additional che
 
 4.  Open [http://localhost:3000](http://localhost:3000) in your browser. You will be prompted to allow camera access.
 
-## ✋ How to Use
+## How to Use
 
 1.  Grant the web page permission to access your webcam.
 2.  Position your hand within the webcam view.
