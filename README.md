@@ -19,7 +19,7 @@ A web application that allows you to control a user interface using real-time ha
 
 This project is built on a modern web stack and leverages in-browser machine learning for its core functionality.
 
-### 1. Architecture & Core Technologies
+##  Machine Learning
 
 The application is built with **Next.js**, a React framework, and is written in **TypeScript**. Styling is handled by **Tailwind CSS**.
 
@@ -28,68 +28,16 @@ The key machine learning components are loaded via CDN to keep the initial bundl
 *   **MediaPipe Hands (`@mediapipe/hands`)**: Provides the underlying high-fidelity hand and finger tracking solution.
 *   **Hand Pose Detection Model (`@tensorflow-models/hand-pose-detection`)**: A pre-trained TensorFlow.js model that detects the keypoints of a hand. This project uses the `MediaPipeHands` detector type, which predicts **21 3D landmarks** on the hand.
 
-### 2. Hand Pose Detection & Gesture Logic
-
-The magic happens in two main stages: detecting the hand and interpreting its pose.
-
-#### **Stage 1: Detecting Hand Landmarks**
-The `WebcamFrame.tsx` component is responsible for setting up the camera and running the hand-pose-detection model on the video feed. On each frame, the model returns an array of 21 keypoints for each detected hand. Each keypoint contains `x`, `y`, and `z` coordinates.
-
-```typescript
-// Simplified model initialization in WebcamFrame.tsx
-const model = await handPoseDetection.createDetector(
-  handPoseDetection.SupportedModels.MediaPipeHands,
-  {
-    runtime: 'mediapipe',
-    solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
-    modelType: 'lite', // or 'full'
-  }
-);
-
-// On every video frame:
-const hands = await model.estimateHands(video);
-if (hands.length > 0) {
-    onGestureDetected(detectGesture(hands[0].keypoints));
-}
-```
-
-#### **Stage 2: Interpreting Gestures (`gestureLogic.ts`)**
-The `detectGesture` function, located in `app/utils/gestureLogic.ts`, takes the array of 21 keypoints and analyzes their geometric relationships to identify a specific pose.
-
-It works by comparing the relative positions of finger joints:
-- **Finger Joints**: The code defines constants for the indices of the fingertips (`TIPS`), proximal interphalangeal joints (`PIPS`), and metacarpophalangeal joints (`MCPs`).
-- **Curl/Extension Detection**: A finger is considered "curled" if its tip's Y-coordinate is below its PIP joint's Y-coordinate. It's "extended" if the tip is significantly above the PIP joint.
-- **Gesture Rules**: Specific gestures are defined by a set of rules. For example, a **Thumbs Up** is recognized when:
-    1. The four fingers (index, middle, ring, pinky) are all curled.
-    2. The thumb tip is vertically above the index finger's knuckle (MCP joint).
-
-```typescript
-// Simplified logic for "Thumbs Up" from gestureLogic.ts
-
-const isIndexCurled = keypoints[TIPS[1]].y > keypoints[PIPS[1]].y;
-const isMiddleCurled = keypoints[TIPS[2]].y > keypoints[PIPS[2]].y;
-// ... and so on for ring and pinky fingers
-
-if (isIndexCurled && isMiddleCurled && isRingCurled && isPinkyCurled) {
-    // If thumb tip is above the index knuckle
-    if (keypoints[TIPS[0]].y < keypoints[MCPs[1]].y) {
-        return 'thumbs_up';
-    }
-}
-```
-This same principle is applied to detect the other gestures, with additional checks like hand inversion for robustness (e.g., distinguishing a thumbs down from a thumbs up when the hand is upside down).
-
 ## Technologies Used
 
 *   **Framework**: [Next.js](https://nextjs.org/) 16 / [React](https://react.dev/) 19
 *   **Language**: [TypeScript](https://www.typescriptlang.org/)
 *   **Machine Learning**:
     *   [TensorFlow.js](https://www.tensorflow.org/js)
-    *   [MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands.html)
+    *   [MediaPipe Hands](https://github.com/google-ai-edge/mediapipe/blob/master/docs/solutions/hands.md)
     *   [TF.js Hand Pose Detection Model](https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection)
 *   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 *   **UI Components**: [Lucide React](https://lucide.dev/) (for icons)
-*   **Utilities**: [clsx](https://github.com/lukeed/clsx) & [tailwind-merge](https://github.com/dcastil/tailwind-merge)
 
 ## Getting Started
 
