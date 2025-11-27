@@ -90,7 +90,7 @@ export default function Home() {
             <Image
               alt="Logo"
               height="30"
-              src="/logo.png"
+              src="./logo.png"
               width="30"
             />
             <span className="font-bold text-xl">Hand Gesture Control</span>
@@ -123,7 +123,6 @@ export default function Home() {
               <ContentBlock title="Robustness" desc="Stricter math ensures fingers are definitely curled or extended." />
               <ContentBlock title="User Feedback" desc="Visual overlays help the user know when an action is about to happen." />
            </div>
-           <div className="p-12 text-center text-neutral-600">-- End of Content --</div>
         </div>
       </main>
       <FloatingActionButton href="https://github.com/BachiDev/hand-gesture-control" />
