@@ -192,7 +192,7 @@ export default function WebcamFrame({
         <div className="absolute inset-0 z-10 bg-neutral-950/90 flex flex-col items-center justify-center gap-4">
           <VideoOff className="w-12 h-12 text-red-500" />
           <h3 className="text-xl font-medium text-white">Camera Stopped</h3>
-          <button onClick={onResumeCamera} className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-full font-medium transition-colors">
+          <button onClick={onResumeCamera} className="px-6 py-2 bg-white hover:bg-gray-300 text-black rounded-full font-medium transition-colors cursor-pointer">
             Resume Camera
           </button>
         </div>
