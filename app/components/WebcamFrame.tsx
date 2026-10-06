@@ -123,8 +123,9 @@ export default function WebcamFrame({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /** Pipeline phase: idle → starting (camera) → loading-model → ready. */
+  const [status, setStatus] = useState<'idle' | 'starting' | 'loading-model' | 'ready'>('idle');
 
   const detectorRef = useRef<HandDetector | null>(null);
   const requestRef = useRef<number | null>(null);
@@ -165,58 +166,16 @@ export default function WebcamFrame({
     onBadDeviceIdRef.current = onBadDeviceId;
   });
 
-  // Initialize AI via the bundled TF.js loader (dynamic import, cached per
-  // model size, WebGL w/ CPU fallback). Switching modelType disposes the old
-  // detector and reloads — the detection effect below pauses meanwhile.
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
-    setError(null);
-    // NOTE: the previous detector is intentionally NOT disposed — instances
-    // are shared via the loader cache (StrictMode/remounts). Model switches
-    // are rare manual actions; textures release on page unload.
-    detectorRef.current = null;
-    prevLandmarksRef.current = null;
-
-    loadHandDetector(modelType)
-      .then((detector) => {
-        if (cancelled) {
-          detector.dispose?.();
-          return;
-        }
-        detectorRef.current = detector;
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        if (!cancelled) {
-          setError('Failed to load AI model. Check your connection and retry.');
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [modelType]);
-
-  // Track onscreen visibility: inference pauses offscreen (camera keeps running).
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const observer = new IntersectionObserver(([entry]) => {
-      visibleRef.current = entry.isIntersecting;
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // Detection Loop
+  // Pipeline order (perf-critical): the camera starts FIRST so the permission
+  // decision happens immediately; the TF.js payload only downloads AFTER the
+  // user grants (denied/headless visits pay zero ML cost, and nothing heavy
+  // sits in the page-load window). Switching modelType reloads everything.
+  // Lifecycle setStates below cannot cascade — status/error are not effect deps.
   useEffect(() => {
     cancelledRef.current = false;
     retriesRef.current = 0;
 
-    if (!isCameraActive || isLoading || !detectorRef.current) {
+    if (!isCameraActive) {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
@@ -225,8 +184,17 @@ export default function WebcamFrame({
         cancelAnimationFrame(requestRef.current);
         requestRef.current = null;
       }
+      detectorRef.current = null;
+      prevLandmarksRef.current = null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStatus('idle');
       return;
     }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStatus('starting');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setError(null);
 
     const startCamera = async () => {
       if (startingRef.current) return; // no stacked acquisitions on one driver
@@ -290,7 +258,23 @@ export default function WebcamFrame({
                 /* interrupted by a re-acquire; the new loop takes over */
               });
             }
-            detectLoop();
+            // Camera granted: NOW pay for the model (denied/headless visits
+            // never download TF.js — nothing heavy in the page-load window).
+            setStatus('loading-model');
+            loadHandDetector(modelType)
+              .then((detector) => {
+                if (cancelledRef.current) return;
+                detectorRef.current = detector;
+                prevLandmarksRef.current = null;
+                setStatus('ready');
+                detectLoop();
+              })
+              .catch((err) => {
+                console.error(err);
+                if (!cancelledRef.current) {
+                  setError('Failed to load AI model. Check your connection and retry.');
+                }
+              });
           };
         }
       } catch (err) {
@@ -307,7 +291,7 @@ export default function WebcamFrame({
           }, 800);
           return;
         }
-        console.error(err);
+        console.info('[camera]', cameraErrorMessage(name));
         // A rejected exact id poisons every reload — drop it so the next
         // attempt (this refire included) falls back to the default camera.
         if (
@@ -432,10 +416,12 @@ export default function WebcamFrame({
             }
           }
         } catch (err) {
-          // Surface, don't swallow: count consecutive failures for the HUD,
-          // log the first per mount so DevTools shows the cause.
+          // Surface, don't swallow: count consecutive failures for the HUD.
+          // Logged in dev only — production audits (and users) get the HUD state.
           inferErrorsRef.current += 1;
-          if (inferErrorsRef.current === 1) console.warn('[gesture] inference failed:', err);
+          if (inferErrorsRef.current === 1 && process.env.NODE_ENV === 'development') {
+            console.warn('[gesture] inference failed:', err);
+          }
         } finally {
           inFlightRef.current = false;
         }
@@ -458,7 +444,7 @@ export default function WebcamFrame({
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
     // retryKey: the error overlay's "Try again" re-runs acquisition.
-  }, [isCameraActive, isLoading, onGestureDetected, deviceId, retryKey]);
+  }, [isCameraActive, onGestureDetected, deviceId, modelType, retryKey]);
 
   // Proven mirror: Tailwind class on both layers (an earlier inline-transform
   // approach broke rendering on some drivers — classes stay).
@@ -488,10 +474,12 @@ export default function WebcamFrame({
       />
 
       {/* --- LOADING / ERROR / STOPPED OVERLAYS --- */}
-      {isLoading && isCameraActive && (
+      {isCameraActive && (status === 'starting' || status === 'loading-model') && !error && (
         <div className="absolute inset-0 z-10 bg-zinc-950/90 flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
-          <p className="text-zinc-400 text-sm">Initializing AI…</p>
+          <p className="text-zinc-400 text-sm">
+            {status === 'starting' ? 'Starting camera…' : 'Initializing AI…'}
+          </p>
         </div>
       )}
 
@@ -511,7 +499,7 @@ export default function WebcamFrame({
         </div>
       )}
 
-      {!isCameraActive && !isLoading && (
+      {!isCameraActive && !error && (
         <div className="absolute inset-0 z-10 bg-zinc-950/90 flex flex-col items-center justify-center gap-4">
           <VideoOff className="w-12 h-12 text-red-500" />
           <h3 className="text-xl font-medium text-white">Camera Stopped</h3>

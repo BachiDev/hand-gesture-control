@@ -346,6 +346,21 @@ push/pull (relative palm-size tracking in `distance.ts`, zero calibration), whic
 composes with hello + swipe on the same pose. Middle-finger toast is now fully
 silent (still classified, still unbound).
 
+### Lighthouse round — 66 → 84 desktop, BP back to 100 (done 2026-10-07)
+
+User report (proxied deploy URL, extensions present): perf 66 (TBT 4.5 s), BP 96
+(console 418 hydration error), a11y/SEO 100.
+- **Camera-first pipeline:** model downloads only AFTER grant (denied/headless pay
+  zero ML). Biggest lever: TBT 4.5 s → 0.6 s in clean-room.
+- **Slim TF imports** (core + converter + webgl/cpu instead of full `tfjs`):
+  largest chunk 796 → 330 KB.
+- **Quiet audits:** acquisition denials → `console.info`, inference warns dev-only.
+  BP back to 100.
+- **Clean-room baseline** (headless Playwright Chromium, no extensions, local
+  prod build): **84 / 100 / 100 / 100**, zero console errors — the user's 418 was
+  environmental (extensions/proxy), not app code. Remainder is Next framework
+  overhead (38 KB unused in one chunk), not ours. Verified: full gates + e2e green.
+
 ### Polish round — fingers icon, docked commands, instructional toast (done 2026-10-07)
 
 Owner fine-tuning, all adopted:

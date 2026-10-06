@@ -57,9 +57,12 @@ This project is built on a modern web stack and leverages in-browser machine lea
 The application is built with **Next.js**, a React framework, and is written in **TypeScript**. Styling is handled by **Tailwind CSS**.
 
 The key machine learning components are bundled via npm (version-pinned, no CDN
-scripts) and lazy-loaded so the page shell paints first:
+scripts) and lazy-loaded **after the camera is granted** — denied/headless visits
+never download them:
 
-- **TensorFlow.js (`@tensorflow/tfjs`)**: The core library that enables running machine learning models in JavaScript (WebGL backend with CPU fallback).
+- **TensorFlow.js core + converter + WebGL/CPU backends** (`@tensorflow/tfjs-core`
+  and friends): slim imports instead of the full `@tensorflow/tfjs` bundle (which
+  drags data/layers packages the model never uses).
 - **Hand Pose Detection Model (`@tensorflow-models/hand-pose-detection`)**: A pre-trained TensorFlow.js model that detects the keypoints of a hand. This project uses the `MediaPipeHands` detector type with the `tfjs` runtime, which predicts **21 3D landmarks** on the hand.
 
 ## Technologies Used

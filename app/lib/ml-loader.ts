@@ -1,10 +1,13 @@
 // app/lib/ml-loader.ts
 //
 // Bundled TF.js hand-detector loader (PLAN.md decision: npm bundle over CDN).
-// - Version-pinned via package.json (@tensorflow/tfjs + @tensorflow-models/hand-pose-detection).
-// - Dynamically imported so the TF.js payload never blocks the page shell.
-// - Cached: concurrent callers share one load.
-// - Prefers the WebGL backend, falls back to CPU on devices without WebGL.
+// - Version-pinned via package.json.
+// - Slim imports (core + converter + webgl/cpu backends) instead of the full
+//   `@tensorflow/tfjs` bundle (which drags data/layers/io the model never uses).
+// - Dynamically imported so the TF.js payload never blocks the page shell —
+//   and only fetched AFTER the camera is granted (see WebcamFrame: no stream,
+//   no model download, so denied/headless visits pay zero ML cost).
+// - Cached per model size; WebGL preferred with CPU fallback; retryable.
 
 import type { Keypoint } from '../utils/gestureLogic';
 
@@ -36,10 +39,13 @@ export function loadHandDetector(modelType: HandModelType = 'full'): Promise<Han
 }
 
 async function doLoad(modelType: HandModelType): Promise<HandDetector> {
+  // Backend imports register themselves as a side effect; core exposes setBackend.
   const [{ createDetector, SupportedModels }, tf] = await Promise.all([
     import('@tensorflow-models/hand-pose-detection'),
-    import('@tensorflow/tfjs'),
-  ]);
+    import('@tensorflow/tfjs-core'),
+    import('@tensorflow/tfjs-backend-webgl'),
+    import('@tensorflow/tfjs-backend-cpu'),
+  ]).then(([model, core]) => [model, core] as const);
 
   try {
     await tf.setBackend('webgl');
