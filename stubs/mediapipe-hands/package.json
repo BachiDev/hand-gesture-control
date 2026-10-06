@@ -1,0 +1,7 @@
+{
+  "name": "@mediapipe/hands",
+  "version": "0.0.0-stub.1",
+  "description": "Local stub: satisfies the static import in @tensorflow-models/hand-pose-detection, which is never constructed (tfjs runtime).",
+  "type": "module",
+  "main": "index.js"
+}

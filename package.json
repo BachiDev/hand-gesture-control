@@ -15,6 +15,7 @@
     "og": "node scripts/generate-og-cover.mjs"
   },
   "dependencies": {
+    "@mediapipe/hands": "file:stubs/mediapipe-hands",
     "@tensorflow-models/hand-pose-detection": "^2.0.1",
     "@tensorflow/tfjs": "^4.22.0",
     "clsx": "^2.1.1",
