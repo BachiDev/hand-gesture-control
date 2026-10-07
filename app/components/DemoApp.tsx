@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { clsx } from 'clsx';
 import WebcamFrame, { type InferenceStats } from './WebcamFrame';
 import SiteHeader from './chrome/SiteHeader';
@@ -9,8 +10,6 @@ import CommandMini from './gestures/CommandMini';
 import FeedbackToast from './FeedbackToast';
 import ContentBlock from './ContentBlock';
 import HomePanel from './panels/HomePanel';
-import ControlsPanel from './panels/ControlsPanel';
-import InsightsPanel from './panels/InsightsPanel';
 import { createSwipeTracker, pushSwipePosition } from '../lib/gestures/swipe';
 import { useGestureMachine, type RawReading } from '../hooks/useGestureMachine';
 import type { LogEntry } from './gestures/EventLog';
@@ -19,6 +18,30 @@ import { SENSITIVITY_PRESETS, GESTURE_CONFIG } from '../lib/gestures/config';
 import { createPushPull, pushPullDelta, resetPushPull } from '../lib/gestures/distance';
 import type { HandAnalysis } from '../lib/gestures/classifiers';
 import type { GestureType } from '../utils/gestureLogic';
+
+// Below-fold tabs split out of the initial bundle (client-only: their content
+// is interactive instruments, not SEO copy). Mounted on first visit, kept
+// mounted after — so back-navigation still slides.
+const ControlsPanel = dynamic(() => import('./panels/ControlsPanel'), {
+  ssr: false,
+  loading: () => <PanelFallback />,
+});
+const InsightsPanel = dynamic(() => import('./panels/InsightsPanel'), {
+  ssr: false,
+  loading: () => <PanelFallback />,
+});
+
+function PanelFallback() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading section"
+      className="rounded-xl border border-zinc-200 dark:border-white/10 p-8 animate-pulse"
+    >
+      <div className="h-6 w-40 rounded bg-zinc-200 dark:bg-white/10" />
+    </div>
+  );
+}
 
 export type Theme = 'dark' | 'light';
 
@@ -133,6 +156,8 @@ export default function DemoApp() {
   }, [isCameraActive, enumerateCameras]);
 
   const [slideDir, setSlideDir] = useState<1 | -1>(1);
+  // Tabs visited so far: unvisited lazy panels stay unmounted (code-split).
+  const [visited, setVisited] = useState<readonly number[]>([0]);
 
   const changeTab = useCallback(
     (i: number, via: string) => {
@@ -145,6 +170,7 @@ export default function DemoApp() {
       appendLog(`tab → ${SITE_TABS[next]} (${via})`);
       tabIndexRef.current = next;
       setSiteTab(next);
+      setVisited((prev) => (prev.includes(next) ? prev : [...prev, next]));
     },
     [appendLog, setSlideDir]
   );
@@ -378,13 +404,15 @@ export default function DemoApp() {
           inert={siteTab !== 1}
           className={tabPanelClass(1)}
         >
-          <ControlsPanel
-            settings={settings}
-            cameras={cameras}
-            onSettingsChange={updateSettings}
-            sliderValue={sliderValue}
-            onSliderChange={setSliderValue}
-          />
+          {visited.includes(1) && (
+            <ControlsPanel
+              settings={settings}
+              cameras={cameras}
+              onSettingsChange={updateSettings}
+              sliderValue={sliderValue}
+              onSliderChange={setSliderValue}
+            />
+          )}
         </div>
         <div
           role="tabpanel"
@@ -393,13 +421,15 @@ export default function DemoApp() {
           inert={siteTab !== 2}
           className={tabPanelClass(2)}
         >
-          <InsightsPanel
-            stats={stats}
-            snapshot={snap}
-            analysis={analysis}
-            log={log}
-            onClearLog={() => setLog([])}
-          />
+          {visited.includes(2) && (
+            <InsightsPanel
+              stats={stats}
+              snapshot={snap}
+              analysis={analysis}
+              log={log}
+              onClearLog={() => setLog([])}
+            />
+          )}
         </div>
       </div>
 

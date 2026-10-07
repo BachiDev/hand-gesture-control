@@ -346,6 +346,18 @@ push/pull (relative palm-size tracking in `distance.ts`, zero calibration), whic
 composes with hello + swipe on the same pose. Middle-finger toast is now fully
 silent (still classified, still unbound).
 
+### Mobile perf — code-split tabs 66 → 82 (done 2026-10-07)
+
+User mobile emulation stuck in the 60s (weak host compounds throttled CPU).
+Measured locally, same setup before/after: **73 → 82** (TBT 740→690 ms,
+LCP 3.4→1.9 s, SI 2.8→2.1 s).
+- Controls + Insights panels `next/dynamic` (`ssr: false`) + mount-on-first-visit:
+  below-fold instruments leave the initial bundle entirely.
+- Verified: full gates + e2e green (tab switching covers the lazy load).
+- Honest floor note: remaining mobile cost is Next+React framework parse under
+  throttling — irreducible without leaving the framework. Also found: the user's
+  report file predates the slim-TF deploy (old 796 KB chunk hash inside).
+
 ### Lighthouse round — 66 → 84 desktop, BP back to 100 (done 2026-10-07)
 
 User report (proxied deploy URL, extensions present): perf 66 (TBT 4.5 s), BP 96
